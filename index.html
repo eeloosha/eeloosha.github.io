@@ -18,9 +18,6 @@
 
 <h1>FundraiseUp Test Assignment</h1>
 
-<!-- Ссылка, на которую нужно нажать -->
-<a href="#" id="QQQQQQ" style="display: inline">Click me</a>
-
 <!-- Fundraise Up: the new standard for online giving -->
 <script>(function(w,d,s,n,a)
 {if(!w[n])
@@ -33,19 +30,35 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 })(window,document,'script','FundraiseUp','AEMZUDUM');</script>
 <!-- End Fundraise Up -->
 
+<a href="#XJKDHSTQ" style="display: none"></a>
+
 <script>
-// Ожидаем, когда документ будет загружен
-document.addEventListener('DOMContentLoaded', (event) => {
-    // Находим элемент по ID
-    const link = document.getElementById('QQQQQQ');
-    
-    // Добавляем обработчик клика
-    link.addEventListener('click', function(event) {
-        event.preventDefault(); // Предотвращаем переход по ссылке
-        console.log('privet'); // Выводим сообщение в консоль
-    });
-});
+	document.getElementById("QQQQQQ").addEventListener("Click", function(event) {
+		event.preventDefault();
+		console.log("pipi pupu");
+		gtag("event", "donate", {
+ 			'event_category': 'Fundraising',
+ 			'event_label': 'Donate Button Click',
+ 		});
+	});
+
+
+// 	document.addEventListener('DOMContentLoaded', (event) => {
+//   const link = document.getElementById('QQQQQQ');
+
+//   link.addEventListener('click', (event) => {
+//     event.preventDefault(); // Предотвращаем переход по ссылке
+// // //    console.log('Link clicked!');
+// 	alert("privet");
+// // Ваш код обработки события
+
+// 	});
+//});
+	
 </script>
+
+
+
 
 </body>
 </html>
