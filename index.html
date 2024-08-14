@@ -18,8 +18,8 @@
 
 <h1>FundraiseUp Test Assignment</h1>
 
-<!-- Временно уберите стиль display: none, чтобы проверить работу ссылки -->
-<a href="#XJKDHSTQ" id="QQQQQQ" style="display: inline" onclick="handleClick(event)">Click me</a>
+<!-- Ссылка, на которую нужно нажать -->
+<a href="#" id="QQQQQQ" style="display: inline">Click me</a>
 
 <!-- Fundraise Up: the new standard for online giving -->
 <script>(function(w,d,s,n,a)
@@ -34,10 +34,17 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <!-- End Fundraise Up -->
 
 <script>
-function handleClick(event) {
-    event.preventDefault(); // Предотвращаем переход по ссылке
-    console.log('privet'); // Выводим сообщение в консоль
-}
+// Ожидаем, когда документ будет загружен
+document.addEventListener('DOMContentLoaded', (event) => {
+    // Находим элемент по ID
+    const link = document.getElementById('QQQQQQ');
+    
+    // Добавляем обработчик клика
+    link.addEventListener('click', function(event) {
+        event.preventDefault(); // Предотвращаем переход по ссылке
+        console.log('privet'); // Выводим сообщение в консоль
+    });
+});
 </script>
 
 </body>
