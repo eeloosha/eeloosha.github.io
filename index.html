@@ -12,13 +12,11 @@
   gtag('config', 'G-4W9HVBX2LB',{ 'debug_mode': true });
 </script>
 
-
 <title>FundraiseUp</title>
 </head>
 <body>
 
 <h1>FundraiseUp Test Assignment</h1>
-
 
 <!-- Fundraise Up: the new standard for online giving -->
 <script>(function(w,d,s,n,a){if(!w[n]){var l='call,catch,on,once,set,then,track'
@@ -30,15 +28,17 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 })(window,document,'script','FundraiseUp','AEMZUDUM');</script>
 <!-- End Fundraise Up -->
 
-
 <a href="#XJKDHSTQ" id="XJKDHSTQ"></a>
 
-	<script>
+<script>
 	document.getElementById("XJKDHSTQ").addEventListener("click", function() {
-	gtag("event","donate", {
-	text: "someone_clicked_on_donate"});
+		gtag("event", "donate", {
+			'event_category': 'Fundraising',
+			'event_label': 'Donate Button Click',
+			'value': 1
+		});
 	});
-	</script>
+</script>
 
 </body>
 </html>
