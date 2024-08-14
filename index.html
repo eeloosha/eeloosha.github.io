@@ -33,14 +33,31 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" id="QQQQQQ" style="display: none"></a>
 
 <script>
-	document.getElementById("QQQQQQ").addEventListener("click", function() {
-		console.log("pipi pupu");
-		gtag("event", "donate", {
+//	document.getElementById("QQQQQQ").addEventListener("Click", function(event) {
+//		event.preventDefault();
+//		console.log("pipi pupu");
+		
+//	});
+	
+	document.addEventListener('DOMContentLoaded', (event) => {
+  const link = document.getElementById('QQQQQQ');
+
+  link.addEventListener('click', (event) => {
+    event.preventDefault(); // Предотвращаем переход по ссылке
+//    console.log('Link clicked!');
+	alert("privet");
+// Ваш код обработки события
+	gtag("event", "donate", {
 			'event_category': 'Fundraising',
 			'event_label': 'Donate Button Click',
 		});
 	});
+});
+	
 </script>
+
+
+
 
 </body>
 </html>
