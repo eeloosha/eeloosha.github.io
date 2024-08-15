@@ -33,24 +33,47 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none"></a>
 	
 <script>
-    // Track checkout opening
-    FundraiseUp.on('checkout:opened', function(data) {
-        gtag('event', 'checkout_opened', {
-            'event_category': 'Donation',
-            'event_label': 'Checkout Opened'
+    // Wait for FundraiseUp to be ready
+    FundraiseUp.ready(() => {
+        console.log('FundraiseUp is ready');
+
+        // Listen to all events
+        FundraiseUp.on('*', function(eventName, data) {
+            console.log('FundraiseUp event:', eventName, data);
+
+            // Check for checkout opened event
+            if (eventName.toLowerCase().includes('checkout') && eventName.toLowerCase().includes('open')) {
+                console.log('Checkout opened event detected');
+                gtag('event', 'checkout_opened', {
+                    'event_category': 'Donation',
+                    'event_label': 'Checkout Opened'
+                });
+            }
+
+            // Check for donation completed event
+            if (eventName.toLowerCase().includes('donation') && eventName.toLowerCase().includes('complete')) {
+                console.log('Donation completed event detected');
+                gtag('event', 'purchase', {
+                    'transaction_id': data.donationId || 'unknown',
+                    'value': data.amount || 0,
+                    'currency': data.currency || 'USD'
+                });
+            }
         });
+
+        // Manually trigger events for testing
+        document.body.insertAdjacentHTML('beforeend', `
+            <button onclick="FundraiseUp.track('checkout:opened')">Simulate Checkout Opened</button>
+            <button onclick="FundraiseUp.track('donation:completed', {donationId: '123', amount: 700, currency: 'USD'})">Simulate Donation Completed</button>
+        `);
     });
 
-    // Track donation completion
-    FundraiseUp.on('donation:completed', function(data) {
-        gtag('event', 'purchase', {
-            'transaction_id': data.donationId,
-            'value': data.amount,
-            'currency': data.currency
-        });
+    // Additional check to ensure gtag is working
+    gtag('event', 'page_view', {
+        'event_category': 'Test',
+        'event_label': 'Page Loaded'
     });
     </script>
-
 
 
 
