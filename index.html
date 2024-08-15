@@ -33,39 +33,38 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none"></a>
 	
 <script>
-    // Function to send event to Google Analytics
+    // Function to send event to Google Analytics with a delay
     function sendGAEvent(eventName, eventParams) {
-        console.log('Attempting to send GA event:', eventName, eventParams);
-        if (typeof gtag === 'function') {
-            gtag('event', eventName, eventParams);
-            console.log('GA event sent successfully');
-        } else {
-            console.error('gtag function not available');
-        }
+        console.log('Queuing GA event:', eventName, eventParams);
+        setTimeout(() => {
+            if (typeof gtag === 'function') {
+                gtag('event', eventName, eventParams);
+                console.log('GA event sent successfully:', eventName);
+            } else {
+                console.error('gtag function not available');
+            }
+        }, 500);  // 500ms delay
     }
 
     // Detect checkout opened
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'childList') {
-                const addedNodes = mutation.addedNodes;
-                for (let i = 0; i < addedNodes.length; i++) {
-                    if (addedNodes[i].nodeType === Node.ELEMENT_NODE) {
-                        const element = addedNodes[i];
-                        if (element.id === 'fru-checkout-popup' || (element.className && element.className.includes('fru-checkout-popup'))) {
-                            console.log('Checkout opened detected');
-                            sendGAEvent('checkout_opened', {
-                                'event_category': 'Donation',
-                                'event_label': 'Checkout Opened'
-                            });
-                        }
-                    }
+    document.addEventListener('click', function(event) {
+        console.log('Click detected:', event.target);
+        if (event.target.matches('a[href^="#"]')) {
+            console.log('Potential widget trigger clicked');
+            setTimeout(() => {
+                const checkoutPopup = document.querySelector('#fru-checkout-popup, .fru-checkout-popup');
+                if (checkoutPopup) {
+                    console.log('Checkout opened detected');
+                    sendGAEvent('checkout_opened', {
+                        'event_category': 'Donation',
+                        'event_label': 'Checkout Opened'
+                    });
+                } else {
+                    console.log('Checkout popup not found after click');
                 }
-            }
-        });
+            }, 1000);  // Check after 1 second
+        }
     });
-
-    observer.observe(document.body, { childList: true, subtree: true });
 
     // Listen for custom donation completed event
     window.addEventListener('fundraiseup:donation:completed', function(e) {
@@ -84,17 +83,20 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
     `);
 
     function testCheckoutOpened() {
-        const testElement = document.createElement('div');
-        testElement.id = 'fru-checkout-popup';
-        document.body.appendChild(testElement);
-        setTimeout(() => testElement.remove(), 100);
+        console.log('Simulating checkout opened');
+        sendGAEvent('checkout_opened', {
+            'event_category': 'Donation',
+            'event_label': 'Checkout Opened (Test)'
+        });
     }
 
     function testDonationCompleted() {
-        const event = new CustomEvent('fundraiseup:donation:completed', {
-            detail: {donationId: '123', amount: 700, currency: 'USD'}
+        console.log('Simulating donation completed');
+        sendGAEvent('purchase', {
+            'transaction_id': 'test123',
+            'value': 700,
+            'currency': 'USD'
         });
-        window.dispatchEvent(event);
     }
 
     // Additional check to ensure gtag is working
