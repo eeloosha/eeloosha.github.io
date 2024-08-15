@@ -33,23 +33,6 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none" id="donation-button"></a>
 	
 <script>
-    // Function to track donation form opening
-    function trackDonationFormOpen() {
-        console.log('Checking for donation form...');
-        // Look for specific elements or attributes indicating the donation form's presence
-        if (document.querySelector('.fundraiseup-donation-form') || document.getElementById('fundraiseup-donation-form')) {
-            console.log('Donation form found!');
-            gtag('event', 'donation_form_opened', {
-                'event_category': 'fundraise_up',
-                'event_label': 'donation_form_open'
-            });
-        }
-    }
-
-    // Observe changes in the DOM
-    const observer = new MutationObserver(trackDonationFormOpen);
-    observer.observe(document.body, { subtree: true, childList: true });
-
     // Event listener for checkout button click
     document.getElementById('donation-button').addEventListener('click', function() {
         console.log('Donation button clicked!');
@@ -59,6 +42,19 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
             'event_label': 'checkout_button_click'
         });
     });
+
+    // Timeout and Manual DOM Query
+    setTimeout(function() {
+        console.log('Checking for donation form...');
+        // Look for specific elements or attributes indicating the donation form's presence
+        if (document.querySelector('.fundraiseup-donation-form') || document.getElementById('fundraiseup-donation-form')) {
+            console.log('Donation form found!');
+            gtag('event', 'donation_form_opened', {
+                'event_category': 'fundraise_up',
+                'event_label': 'donation_form_open'
+            });
+        }
+    }, 3000); // Wait 3 seconds
 </script>
 
 
