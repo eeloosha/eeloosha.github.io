@@ -33,22 +33,28 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none" id="donation-button"></a>
 	
 <script>
+    // Function to track donation form opening
+    function trackDonationFormOpen() {
+        // Look for specific elements or attributes indicating the donation form's presence
+        // Example: if the form has a specific class or ID
+        if (document.querySelector('.fundraiseup-donation-form') || document.getElementById('fundraiseup-donation-form')) {
+            gtag('event', 'donation_form_opened', {
+                'event_category': 'fundraise_up',
+                'event_label': 'donation_form_open'
+            });
+        }
+    }
+
+    // Observe changes in the DOM
+    const observer = new MutationObserver(trackDonationFormOpen);
+    observer.observe(document.body, { subtree: true, childList: true });
+
     // Event listener for checkout button click
     document.getElementById('donation-button').addEventListener('click', function() {
         // Trigger event to track checkout initiation
         gtag('event', 'checkout_started', {
             'event_category': 'fundraise_up',
             'event_label': 'checkout_button_click'
-        });
-    });
-
-    // Listen for Fundraise Up events (assuming they are emitted using a specific method)
-    window.FundraiseUp.on('donation_completed', function(data) {
-        // Trigger event to track donation completion
-        gtag('event', 'donation_completed', {
-            'event_category': 'fundraise_up',
-            'event_label': 'donation_success',
-            'value': data.amount // Assuming the event data contains donation amount
         });
     });
 </script>
