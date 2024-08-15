@@ -34,9 +34,9 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
-    const button = document.querySelector('[data-qa]="fun-element"');
-    if (button) {
-        button.addEventListener('click', function(event) {
+    const element = document.getElementsByClassName("button-hover-bg");
+    if (element) {
+        element.addEventListener('click', function(event) {
             event.preventDefault(); // Предотвращаем стандартное действие
             console.log("pipi pupu"); // Выводим сообщение в консоль
             gtag("event", "donate", {
@@ -45,7 +45,7 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
             });
         });
     } else {
-        console.error('Button with data-qa="fun-element" not found!');
+        console.error('Button with class "button-hover-bg" not found!');
     }
 });
 
