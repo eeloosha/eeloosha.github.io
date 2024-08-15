@@ -33,8 +33,15 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none"></a>
 	
 <script>
-    // Wait for FundraiseUp to be ready
-    FundraiseUp.ready(() => {
+    function waitForFundraiseUp(callback) {
+        if (typeof FundraiseUp !== 'undefined' && FundraiseUp.on) {
+            callback();
+        } else {
+            setTimeout(function() { waitForFundraiseUp(callback); }, 100);
+        }
+    }
+
+    waitForFundraiseUp(function() {
         console.log('FundraiseUp is ready');
 
         // Listen to all events
