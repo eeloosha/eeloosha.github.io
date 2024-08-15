@@ -33,50 +33,67 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none"></a>
 	
 <script>
-    function waitForFundraiseUp(callback) {
-        if (typeof FundraiseUp !== 'undefined' && FundraiseUp.on) {
-            callback();
-        } else {
-            setTimeout(function() { waitForFundraiseUp(callback); }, 100);
-        }
+    // Function to send event to Google Analytics
+    function sendGAEvent(eventName, eventParams) {
+        console.log('Sending GA event:', eventName, eventParams);
+        gtag('event', eventName, eventParams);
     }
 
-    waitForFundraiseUp(function() {
-        console.log('FundraiseUp is ready');
-
-        // Listen to all events
-        FundraiseUp.on('*', function(eventName, data) {
-            console.log('FundraiseUp event:', eventName, data);
-
-            // Check for checkout opened event
-            if (eventName.toLowerCase().includes('checkout') && eventName.toLowerCase().includes('open')) {
-                console.log('Checkout opened event detected');
-                gtag('event', 'checkout_opened', {
-                    'event_category': 'Donation',
-                    'event_label': 'Checkout Opened'
-                });
-            }
-
-            // Check for donation completed event
-            if (eventName.toLowerCase().includes('donation') && eventName.toLowerCase().includes('complete')) {
-                console.log('Donation completed event detected');
-                gtag('event', 'purchase', {
-                    'transaction_id': data.donationId || 'unknown',
-                    'value': data.amount || 0,
-                    'currency': data.currency || 'USD'
-                });
+    // Detect checkout opened
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+                const addedNodes = mutation.addedNodes;
+                for (let i = 0; i < addedNodes.length; i++) {
+                    if (addedNodes[i].nodeType === Node.ELEMENT_NODE) {
+                        const element = addedNodes[i];
+                        if (element.id === 'fru-checkout-popup' || element.className.includes('fru-checkout-popup')) {
+                            console.log('Checkout opened detected');
+                            sendGAEvent('checkout_opened', {
+                                'event_category': 'Donation',
+                                'event_label': 'Checkout Opened'
+                            });
+                        }
+                    }
+                }
             }
         });
-
-        // Manually trigger events for testing
-        document.body.insertAdjacentHTML('beforeend', `
-            <button onclick="FundraiseUp.track('checkout:opened')">Simulate Checkout Opened</button>
-            <button onclick="FundraiseUp.track('donation:completed', {donationId: '123', amount: 700, currency: 'USD'})">Simulate Donation Completed</button>
-        `);
     });
 
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Listen for custom donation completed event
+    window.addEventListener('fundraiseup:donation:completed', function(e) {
+        console.log('Donation completed event detected', e.detail);
+        sendGAEvent('purchase', {
+            'transaction_id': e.detail.donationId || 'unknown',
+            'value': e.detail.amount || 0,
+            'currency': e.detail.currency || 'USD'
+        });
+    });
+
+    // Test buttons
+    document.body.insertAdjacentHTML('beforeend', `
+        <button onclick="testCheckoutOpened()">Simulate Checkout Opened</button>
+        <button onclick="testDonationCompleted()">Simulate Donation Completed</button>
+    `);
+
+    function testCheckoutOpened() {
+        const testElement = document.createElement('div');
+        testElement.id = 'fru-checkout-popup';
+        document.body.appendChild(testElement);
+        setTimeout(() => testElement.remove(), 100);
+    }
+
+    function testDonationCompleted() {
+        const event = new CustomEvent('fundraiseup:donation:completed', {
+            detail: {donationId: '123', amount: 700, currency: 'USD'}
+        });
+        window.dispatchEvent(event);
+    }
+
     // Additional check to ensure gtag is working
-    gtag('event', 'page_view', {
+    sendGAEvent('page_view', {
         'event_category': 'Test',
         'event_label': 'Page Loaded'
     });
