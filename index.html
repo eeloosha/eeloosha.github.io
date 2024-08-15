@@ -35,8 +35,13 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <script>
     // Function to send event to Google Analytics
     function sendGAEvent(eventName, eventParams) {
-        console.log('Sending GA event:', eventName, eventParams);
-        gtag('event', eventName, eventParams);
+        console.log('Attempting to send GA event:', eventName, eventParams);
+        if (typeof gtag === 'function') {
+            gtag('event', eventName, eventParams);
+            console.log('GA event sent successfully');
+        } else {
+            console.error('gtag function not available');
+        }
     }
 
     // Detect checkout opened
@@ -47,7 +52,7 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
                 for (let i = 0; i < addedNodes.length; i++) {
                     if (addedNodes[i].nodeType === Node.ELEMENT_NODE) {
                         const element = addedNodes[i];
-                        if (element.id === 'fru-checkout-popup' || element.className.includes('fru-checkout-popup')) {
+                        if (element.id === 'fru-checkout-popup' || (element.className && element.className.includes('fru-checkout-popup'))) {
                             console.log('Checkout opened detected');
                             sendGAEvent('checkout_opened', {
                                 'event_category': 'Donation',
@@ -93,12 +98,14 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
     }
 
     // Additional check to ensure gtag is working
-    sendGAEvent('page_view', {
-        'event_category': 'Test',
-        'event_label': 'Page Loaded'
+    window.addEventListener('load', function() {
+        console.log('Page loaded, sending test event');
+        sendGAEvent('page_view', {
+            'event_category': 'Test',
+            'event_label': 'Page Loaded'
+        });
     });
     </script>
-
 
 
 </body>
