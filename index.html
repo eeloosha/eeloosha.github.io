@@ -44,23 +44,18 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
       }
   }
 
-  // Function to set up iframe listener
-  function setupIframeListener(iframe) {
-      console.log('Setting up listener for iframe:', iframe);
-      iframe.addEventListener('load', function() {
-          console.log('Iframe loaded');
-          try {
-              iframe.contentDocument.body.addEventListener('click', function(event) {
-                  console.log('Click detected inside iframe');
-                  sendGAEvent('checkout_started', {
-                      'event_category': 'Donation',
-                      'event_label': 'Checkout Started'
-                  });
-              });
-          } catch (e) {
-              console.error('Error attaching click listener to iframe:', e);
-          }
-      });
+  let checkoutStarted = false;
+
+  // Function to handle iframe interaction
+  function handleIframeInteraction() {
+      if (!checkoutStarted) {
+          console.log('Interaction with donation iframe detected');
+          checkoutStarted = true;
+          sendGAEvent('checkout_started', {
+              'event_category': 'Donation',
+              'event_label': 'Checkout Started'
+          });
+      }
   }
 
   // Set up MutationObserver to watch for iframe creation
@@ -68,9 +63,17 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
       mutations.forEach((mutation) => {
           if (mutation.type === 'childList') {
               mutation.addedNodes.forEach((node) => {
-                  if (node.nodeName === 'IFRAME') {
-                      console.log('Iframe detected:', node);
-                      setupIframeListener(node);
+                  if (node.nodeName === 'IFRAME' && node.id === 'XJKDHSTQ') {
+                      console.log('Target iframe detected:', node);
+                      // Use a timeout to ensure the iframe is fully loaded
+                      setTimeout(() => {
+                          window.addEventListener('blur', function() {
+                              if (document.activeElement === node) {
+                                  handleIframeInteraction();
+                              }
+                          });
+                      }, 1000);
+                      observer.disconnect(); // Stop observing once we've found our iframe
                   }
               });
           }
