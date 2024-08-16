@@ -35,7 +35,7 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <script>
   // Function to send event to Google Analytics
   function sendGAEvent(eventName, eventParams) {
-      console.log('Sending GA event:', eventName, eventParams);
+      console.log('Attempting to send GA event:', eventName, eventParams);
       if (typeof gtag === 'function') {
           gtag('event', eventName, eventParams);
           console.log('GA event sent successfully:', eventName);
@@ -44,42 +44,50 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
       }
   }
 
-  // Function to detect iframe creation
-  function detectIframeCreation(callback) {
-      const observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-              if (mutation.type === 'childList') {
-                  const addedNodes = mutation.addedNodes;
-                  for (let i = 0; i < addedNodes.length; i++) {
-                      if (addedNodes[i].nodeName === 'IFRAME') {
-                          callback(addedNodes[i]);
-                      }
-                  }
-              }
-          });
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
+  // Function to check if an element is visible
+  function isVisible(elem) {
+      return !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
   }
 
-  // Detect donation button click and subsequent iframe creation
-  document.addEventListener('click', function(event) {
-      if (event.target.id === 'XJKDHSTQ' || event.target.closest('#XJKDHSTQ')) {
-          console.log('Donation button clicked');
-          
-          detectIframeCreation((iframe) => {
-              console.log('Iframe detected:', iframe);
-              sendGAEvent('checkout_started', {
-                  'event_category': 'Donation',
-                  'event_label': 'Checkout Started'
-              });
-          });
+  // Function to find the donation button
+  function findDonationButton() {
+      // Look for elements with specific attributes or classes that might indicate it's the donation button
+      const possibleButtons = document.querySelectorAll('a[href^="#"], button, .donate-button, .fru-button');
+      for (let btn of possibleButtons) {
+          if (isVisible(btn) && (btn.textContent.toLowerCase().includes('donate') || btn.className.toLowerCase().includes('donate'))) {
+              return btn;
+          }
       }
-  });
+      return null;
+  }
 
-  // Additional check to ensure gtag is working
+  // Function to set up the event listener
+  function setupDonationButtonListener() {
+      const donationButton = findDonationButton();
+      if (donationButton) {
+          console.log('Donation button found:', donationButton);
+          donationButton.addEventListener('click', function(event) {
+              console.log('Donation button clicked');
+              // Short timeout to allow for any asynchronous operations
+              setTimeout(() => {
+                  sendGAEvent('checkout_started', {
+                      'event_category': 'Donation',
+                      'event_label': 'Checkout Started'
+                  });
+              }, 100);
+          });
+      } else {
+          console.log('Donation button not found. Will try again in 1 second.');
+          setTimeout(setupDonationButtonListener, 1000);
+      }
+  }
+
+  // Set up the listener when the page is loaded
   window.addEventListener('load', function() {
-      console.log('Page loaded, sending test event');
+      console.log('Page loaded, setting up donation button listener');
+      setupDonationButtonListener();
+
+      // Send a test event to ensure GA is working
       sendGAEvent('page_view', {
           'event_category': 'Test',
           'event_label': 'Page Loaded'
