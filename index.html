@@ -44,48 +44,45 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
       }
   }
 
-  // Function to check if an element is visible
-  function isVisible(elem) {
-      return !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
-  }
-
-  // Function to find the donation button
-  function findDonationButton() {
-      // Look for elements with specific attributes or classes that might indicate it's the donation button
-      const possibleButtons = document.querySelectorAll('a[href^="#"], button, .donate-button, .fru-button');
-      for (let btn of possibleButtons) {
-          if (isVisible(btn) && (btn.textContent.toLowerCase().includes('donate') || btn.className.toLowerCase().includes('donate'))) {
-              return btn;
-          }
-      }
-      return null;
-  }
-
-  // Function to set up the event listener
-  function setupDonationButtonListener() {
-      const donationButton = findDonationButton();
-      if (donationButton) {
-          console.log('Donation button found:', donationButton);
-          donationButton.addEventListener('click', function(event) {
-              console.log('Donation button clicked');
-              // Short timeout to allow for any asynchronous operations
-              setTimeout(() => {
+  // Function to set up iframe listener
+  function setupIframeListener(iframe) {
+      console.log('Setting up listener for iframe:', iframe);
+      iframe.addEventListener('load', function() {
+          console.log('Iframe loaded');
+          try {
+              iframe.contentDocument.body.addEventListener('click', function(event) {
+                  console.log('Click detected inside iframe');
                   sendGAEvent('checkout_started', {
                       'event_category': 'Donation',
                       'event_label': 'Checkout Started'
                   });
-              }, 100);
-          });
-      } else {
-          console.log('Donation button not found. Will try again in 1 second.');
-          setTimeout(setupDonationButtonListener, 1000);
-      }
+              });
+          } catch (e) {
+              console.error('Error attaching click listener to iframe:', e);
+          }
+      });
   }
+
+  // Set up MutationObserver to watch for iframe creation
+  const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+              mutation.addedNodes.forEach((node) => {
+                  if (node.nodeName === 'IFRAME') {
+                      console.log('Iframe detected:', node);
+                      setupIframeListener(node);
+                  }
+              });
+          }
+      });
+  });
+
+  // Start observing the document with the configured parameters
+  observer.observe(document.body, { childList: true, subtree: true });
 
   // Set up the listener when the page is loaded
   window.addEventListener('load', function() {
-      console.log('Page loaded, setting up donation button listener');
-      setupDonationButtonListener();
+      console.log('Page loaded, setting up observers');
 
       // Send a test event to ensure GA is working
       sendGAEvent('page_view', {
