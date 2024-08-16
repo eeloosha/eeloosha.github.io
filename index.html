@@ -39,7 +39,10 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
       setTimeout(() => {
           if (typeof gtag === 'function') {
               gtag('event', eventName, eventParams);
-              console.log('GA event sent successfully:', eventName);
+              console.log('GA event sent:', eventName, eventParams);
+              
+              // Log the dataLayer for verification
+              console.log('Current dataLayer:', JSON.parse(JSON.stringify(window.dataLayer)));
           } else {
               console.error('gtag function not available');
           }
@@ -48,21 +51,17 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 
   // Detect checkout opened
   document.addEventListener('click', function(event) {
-      console.log('Click detected:', event.target);
       if (event.target.matches('a[href^="#"]')) {
-          console.log('Potential widget trigger clicked');
           setTimeout(() => {
               const checkoutPopup = document.querySelector('#fru-checkout-popup, .fru-checkout-popup');
               if (checkoutPopup) {
                   console.log('Checkout opened detected');
-                  sendGAEvent('checkout_opened', {
+                  sendGAEvent('begin_checkout', {
                       'event_category': 'Donation',
                       'event_label': 'Checkout Opened'
                   });
-              } else {
-                  console.log('Checkout popup not found after click');
               }
-          }, 1000);  // Check after 1 second
+          }, 1000);
       }
   });
 
@@ -70,9 +69,14 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
   window.addEventListener('fundraiseup:donation:completed', function(e) {
       console.log('Donation completed event detected', e.detail);
       sendGAEvent('purchase', {
-          'transaction_id': e.detail.donationId || 'unknown',
-          'value': e.detail.amount || 0,
-          'currency': e.detail.currency || 'USD'
+          currency: e.detail.currency || 'USD',
+          transaction_id: e.detail.donationId || 'unknown',
+          value: e.detail.amount || 0,
+          items: [{
+              item_name: 'Donation',
+              price: e.detail.amount || 0,
+              quantity: 1
+          }]
       });
   });
 
@@ -84,7 +88,7 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 
   function testCheckoutOpened() {
       console.log('Simulating checkout opened');
-      sendGAEvent('checkout_opened', {
+      sendGAEvent('begin_checkout', {
           'event_category': 'Donation',
           'event_label': 'Checkout Opened (Test)'
       });
@@ -93,9 +97,14 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
   function testDonationCompleted() {
       console.log('Simulating donation completed');
       sendGAEvent('purchase', {
-          'transaction_id': 'test123',
-          'value': 700,
-          'currency': 'USD'
+          currency: 'USD',
+          transaction_id: 'test123',
+          value: 700,
+          items: [{
+              item_name: 'Donation',
+              price: 700,
+              quantity: 1
+          }]
       });
   }
 
