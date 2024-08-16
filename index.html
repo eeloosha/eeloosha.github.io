@@ -33,75 +33,49 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none" id="donation-button"></a>
 	
 <script>
-  // Function to send event to Google Analytics with a delay
+  // Function to send event to Google Analytics
   function sendGAEvent(eventName, eventParams) {
-      console.log('Queuing GA event:', eventName, eventParams);
-      setTimeout(() => {
-          if (typeof gtag === 'function') {
-              gtag('event', eventName, eventParams);
-              console.log('GA event sent:', eventName, eventParams);
-              
-              // Log the dataLayer for verification
-              console.log('Current dataLayer:', JSON.parse(JSON.stringify(window.dataLayer)));
-          } else {
-              console.error('gtag function not available');
-          }
-      }, 500);  // 500ms delay
+      console.log('Sending GA event:', eventName, eventParams);
+      if (typeof gtag === 'function') {
+          gtag('event', eventName, eventParams);
+          console.log('GA event sent successfully:', eventName);
+      } else {
+          console.error('gtag function not available');
+      }
   }
 
-  // Detect checkout opened
-  document.addEventListener('click', function(event) {
-      if (event.target.matches('a[href^="#"]')) {
-          setTimeout(() => {
-              const checkoutPopup = document.querySelector('#fru-checkout-popup, .fru-checkout-popup');
-              if (checkoutPopup) {
-                  console.log('Checkout opened detected');
-                  sendGAEvent('begin_checkout', {
-                      'event_category': 'Donation',
-                      'event_label': 'Checkout Opened'
-                  });
+  // Function to detect iframe creation
+  function detectIframeCreation(callback) {
+      const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+              if (mutation.type === 'childList') {
+                  const addedNodes = mutation.addedNodes;
+                  for (let i = 0; i < addedNodes.length; i++) {
+                      if (addedNodes[i].nodeName === 'IFRAME') {
+                          callback(addedNodes[i]);
+                      }
+                  }
               }
-          }, 1000);
+          });
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  // Detect donation button click and subsequent iframe creation
+  document.addEventListener('click', function(event) {
+      if (event.target.id === 'donation-button' || event.target.closest('#donation-button')) {
+          console.log('Donation button clicked');
+          
+          detectIframeCreation((iframe) => {
+              console.log('Iframe detected:', iframe);
+              sendGAEvent('checkout_started', {
+                  'event_category': 'Donation',
+                  'event_label': 'Checkout Started'
+              });
+          });
       }
   });
-
-  // Listen for custom donation completed event
-  window.addEventListener('fundraiseup:donation:completed', function(e) {
-      console.log('Donation completed event detected', e.detail);
-      sendGAEvent('purchase', {
-          currency: e.detail.currency || 'USD',
-          transaction_id: e.detail.donationId || 'unknown',
-          value: e.detail.amount || 0,
-          items: [{
-              item_name: 'Donation',
-              price: e.detail.amount || 0,
-              quantity: 1
-          }]
-      });
-  });
-
-  // Test buttons
-  document.body.insertAdjacentHTML('beforeend', `
-      <button onclick="testCheckoutOpened()">Simulate Checkout Opened</button>
-      <button onclick="testDonationCompleted()">Simulate Donation Completed</button>
-  `);
-
-  function testCheckoutOpened() {
-      console.log('Simulating checkout opened');
-      sendGAEvent('begin_checkout', {
-          'event_category': 'Donation',
-          'event_label': 'Checkout Opened (Test)'
-      });
-  }
-
-  function testDonationCompleted() {
-      console.log('Simulating donation completed');
-      sendGAEvent('purchase', {
-          'currency': 'USD',
-          'transaction_id': 'test123',
-          'value': 700,
-      });
-  }
 
   // Additional check to ensure gtag is working
   window.addEventListener('load', function() {
