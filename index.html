@@ -33,67 +33,67 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none" id="donation-button"></a>
 	
 <script>
-  // Function to send event to Google Analytics
-  function sendGAEvent(eventName, eventParams) {
-      console.log('Attempting to send GA event:', eventName, eventParams);
-      if (typeof gtag === 'function') {
-          gtag('event', eventName, eventParams);
-          console.log('GA event sent successfully:', eventName);
-      } else {
-          console.error('gtag function not available');
-      }
-  }
+    // Function to send event to Google Analytics
+    function sendGAEvent(eventName, eventParams) {
+        console.log('Attempting to send GA event:', eventName, eventParams);
+        if (typeof gtag === 'function') {
+            gtag('event', eventName, eventParams);
+            console.log('GA event sent successfully:', eventName);
+        } else {
+            console.error('gtag function not available');
+        }
+    }
 
-  let checkoutStarted = false;
+    let checkoutStarted = false;
 
-  // Function to handle donation button click
-  function handleDonationButtonClick(event) {
-      if (!checkoutStarted) {
-          console.log('Donation button clicked');
-          checkoutStarted = true;
-          sendGAEvent('checkout_started', {
-              'event_category': 'Donation',
-              'event_label': 'Checkout Started'
-          });
-      }
-  }
+    // Function to handle donation button click
+    function handleDonationButtonClick(event) {
+        if (!checkoutStarted) {
+            console.log('Donation button clicked');
+            checkoutStarted = true;
+            sendGAEvent('checkout_started', {
+                'event_category': 'Donation',
+                'event_label': 'Checkout Started'
+            });
+        }
+    }
 
-  // Function to set up click listener
-  function setupClickListener() {
-      // Find all elements with href="#XJKDHSTQ"
-      const donationTriggers = document.querySelectorAll('a[href="#XJKDHSTQ"]');
-      
-      if (donationTriggers.length > 0) {
-          console.log('Donation triggers found:', donationTriggers.length);
-          donationTriggers.forEach(trigger => {
-              trigger.addEventListener('click', handleDonationButtonClick);
-          });
-      } else {
-          console.log('No donation triggers found. Will try again in 1 second.');
-          setTimeout(setupClickListener, 1000);
-      }
-  }
+    // Function to set up click listener
+    function setupClickListener() {
+        // Find all elements with href="#XJKDHSTQ"
+        const donationTriggers = document.querySelectorAll('a[href="#XJKDHSTQ"]');
+        
+        if (donationTriggers.length > 0) {
+            console.log('Donation triggers found:', donationTriggers.length);
+            donationTriggers.forEach(trigger => {
+                trigger.addEventListener('click', handleDonationButtonClick);
+            });
+        } else {
+            console.log('No donation triggers found. Will try again in 1 second.');
+            setTimeout(setupClickListener, 1000);
+        }
+    }
 
-  // Set up the listener when the page is loaded
-  window.addEventListener('load', function() {
-      console.log('Page loaded, setting up click listeners');
-      setupClickListener();
+    // Set up the listener when the page is loaded
+    window.addEventListener('load', function() {
+        console.log('Page loaded, setting up click listeners');
+        setupClickListener();
 
-      // Send a test event to ensure GA is working
-      sendGAEvent('page_view', {
-          'event_category': 'Test',
-          'event_label': 'Page Loaded'
-      });
-  });
+        // Send a test event to ensure GA is working
+        sendGAEvent('page_view', {
+            'event_category': 'Test',
+            'event_label': 'Page Loaded'
+        });
+    });
 
-  // Fallback: listen for clicks on the entire document
-  document.addEventListener('click', function(event) {
-      const clickedElement = event.target.closest('a[href="#XJKDHSTQ"]');
-      if (clickedElement) {
-          handleDonationButtonClick(event);
-      }
-  });
-  </script>
+    // Fallback: listen for clicks on the entire document
+    document.addEventListener('click', function(event) {
+        const clickedElement = event.target.closest('a[href="#XJKDHSTQ"]');
+        if (clickedElement) {
+            handleDonationButtonClick(event);
+        }
+    });
+    </script>
 
 </body>
 </html>
