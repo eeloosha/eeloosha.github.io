@@ -33,65 +33,88 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 <a href="#XJKDHSTQ" style="display: none" id="donation-button"></a>
 	
 <script>
-    // Function to send event to Google Analytics
+    // Function to send event to Google Analytics with a delay
     function sendGAEvent(eventName, eventParams) {
-        console.log('Attempting to send GA event:', eventName, eventParams);
-        if (typeof gtag === 'function') {
-            gtag('event', eventName, eventParams);
-            console.log('GA event sent successfully:', eventName);
-        } else {
-            console.error('gtag function not available');
-        }
+        console.log('Queuing GA event:', eventName, eventParams);
+        setTimeout(() => {
+            if (typeof gtag === 'function') {
+                gtag('event', eventName, eventParams);
+                console.log('GA event sent:', eventName, eventParams);
+                
+                // Log the dataLayer for verification
+                console.log('Current dataLayer:', JSON.parse(JSON.stringify(window.dataLayer)));
+            } else {
+                console.error('gtag function not available');
+            }
+        }, 500);  // 500ms delay
     }
 
-    let checkoutStarted = false;
-
-    // Function to handle donation button click
-    function handleDonationButtonClick(event) {
-        if (!checkoutStarted) {
-            console.log('Donation button clicked');
-            checkoutStarted = true;
-            sendGAEvent('checkout_started', {
-                'event_category': 'Donation',
-                'event_label': 'Checkout Started'
-            });
+    // Detect checkout opened
+    document.addEventListener('click', function(event) {
+        if (event.target.matches('a[href^="#"]')) {
+            setTimeout(() => {
+                const checkoutPopup = document.querySelector('#fru-checkout-popup, .fru-checkout-popup');
+                if (checkoutPopup) {
+                    console.log('Checkout opened detected');
+                    sendGAEvent('begin_checkout', {
+                        'event_category': 'Donation',
+                        'event_label': 'Checkout Opened'
+                    });
+                }
+            }, 1000);
         }
+    });
+
+    // Listen for custom donation completed event
+    window.addEventListener('fundraiseup:donation:completed', function(e) {
+        console.log('Donation completed event detected', e.detail);
+        sendGAEvent('purchase', {
+            currency: e.detail.currency || 'USD',
+            transaction_id: e.detail.donationId || 'unknown',
+            value: e.detail.amount || 0,
+            items: [{
+                item_name: 'Donation',
+                price: e.detail.amount || 0,
+                quantity: 1
+            }]
+        });
+    });
+
+    // Test buttons
+    document.body.insertAdjacentHTML('beforeend', `
+        <button onclick="testCheckoutOpened()">Simulate Checkout Opened</button>
+        <button onclick="testDonationCompleted()">Simulate Donation Completed</button>
+    `);
+
+    function testCheckoutOpened() {
+        console.log('Simulating checkout opened');
+        sendGAEvent('begin_checkout', {
+            'event_category': 'Donation',
+            'event_label': 'Checkout Opened (Test)'
+        });
     }
 
-    // Function to set up click listener
-    function setupClickListener() {
-        // Find all elements with href="#XJKDHSTQ"
-        const donationTriggers = document.querySelectorAll('a[href="#XJKDHSTQ"]');
-        
-        if (donationTriggers.length > 0) {
-            console.log('Donation triggers found:', donationTriggers.length);
-            donationTriggers.forEach(trigger => {
-                trigger.addEventListener('click', handleDonationButtonClick);
-            });
-        } else {
-            console.log('No donation triggers found. Will try again in 1 second.');
-            setTimeout(setupClickListener, 1000);
-        }
+    function testDonationCompleted() {
+        console.log('Simulating donation completed');
+        sendGAEvent('purchase', {
+            currency: 'USD',
+            transaction_id: 'test123',
+            value: 700,
+            items: [{
+                item_name: 'Donation',
+                price: 700,
+                quantity: 1
+            }]
+        });
     }
 
-    // Set up the listener when the page is loaded
+    // Additional check to ensure gtag is working
     window.addEventListener('load', function() {
-        console.log('Page loaded, setting up click listeners');
-        setupClickListener();
-
-        // Send a test event to ensure GA is working
+        console.log('Page loaded, sending test event');
         sendGAEvent('page_view', {
             'event_category': 'Test',
             'event_label': 'Page Loaded'
         });
-    });
-
-    // Fallback: listen for clicks on the entire document
-    document.addEventListener('click', function(event) {
-        const clickedElement = event.target.closest('a[href="#XJKDHSTQ"]');
-        if (clickedElement) {
-            handleDonationButtonClick(event);
-        }
     });
     </script>
 
