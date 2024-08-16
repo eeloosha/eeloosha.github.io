@@ -46,10 +46,10 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
 
   let checkoutStarted = false;
 
-  // Function to handle iframe interaction
-  function handleIframeInteraction() {
+  // Function to handle donation button click
+  function handleDonationButtonClick(event) {
       if (!checkoutStarted) {
-          console.log('Interaction with donation iframe detected');
+          console.log('Donation button clicked');
           checkoutStarted = true;
           sendGAEvent('checkout_started', {
               'event_category': 'Donation',
@@ -58,34 +58,26 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
       }
   }
 
-  // Set up MutationObserver to watch for iframe creation
-  const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-          if (mutation.type === 'childList') {
-              mutation.addedNodes.forEach((node) => {
-                  if (node.nodeName === 'IFRAME' && node.id === 'XJKDHSTQ') {
-                      console.log('Target iframe detected:', node);
-                      // Use a timeout to ensure the iframe is fully loaded
-                      setTimeout(() => {
-                          window.addEventListener('blur', function() {
-                              if (document.activeElement === node) {
-                                  handleIframeInteraction();
-                              }
-                          });
-                      }, 1000);
-                      observer.disconnect(); // Stop observing once we've found our iframe
-                  }
-              });
-          }
-      });
-  });
-
-  // Start observing the document with the configured parameters
-  observer.observe(document.body, { childList: true, subtree: true });
+  // Function to set up click listener
+  function setupClickListener() {
+      // Find all elements with href="#XJKDHSTQ"
+      const donationTriggers = document.querySelectorAll('a[href="#XJKDHSTQ"]');
+      
+      if (donationTriggers.length > 0) {
+          console.log('Donation triggers found:', donationTriggers.length);
+          donationTriggers.forEach(trigger => {
+              trigger.addEventListener('click', handleDonationButtonClick);
+          });
+      } else {
+          console.log('No donation triggers found. Will try again in 1 second.');
+          setTimeout(setupClickListener, 1000);
+      }
+  }
 
   // Set up the listener when the page is loaded
   window.addEventListener('load', function() {
-      console.log('Page loaded, setting up observers');
+      console.log('Page loaded, setting up click listeners');
+      setupClickListener();
 
       // Send a test event to ensure GA is working
       sendGAEvent('page_view', {
@@ -93,8 +85,15 @@ for(i=0;i<7;i++)o[l[i]]=o(l[i]);w[n]=o}
           'event_label': 'Page Loaded'
       });
   });
-  </script>
 
+  // Fallback: listen for clicks on the entire document
+  document.addEventListener('click', function(event) {
+      const clickedElement = event.target.closest('a[href="#XJKDHSTQ"]');
+      if (clickedElement) {
+          handleDonationButtonClick(event);
+      }
+  });
+  </script>
 
 </body>
 </html>
